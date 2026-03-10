@@ -57,7 +57,7 @@ class CryptoIssueMonitor:
 
     def load_processed_issues(self) -> Set[str]:
         """Load list of already processed issues"""
-        if os.path.exists(self.safety_file):
+       if os.path.exists(self.safety_file):
     try:
         with open(self.safety_file, "r") as f:
             data = json.load(f)
