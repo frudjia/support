@@ -2,9 +2,7 @@ name: Smart Crypto Monitor
 
 on:
   schedule:
-    # CONSERVATIVE schedule - checks every 16-22 minutes (SAFE - proven stable)
     - cron: '7,23,41,59 * * * *'
-  
   workflow_dispatch:
 
 jobs:
@@ -30,20 +28,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests
     
-    - name: Make script executable
-      run: chmod +x monitor_issues.py
-    
     - name: Run Monitor
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TARGET_REPO: frudjia/support
       run: |
         python monitor_issues.py
-    
-    - name: Cleanup decoded file
-      if: always()
-      run: |
-        rm -f monitor_issues.py
     
     - name: Commit tracking files
       run: |
