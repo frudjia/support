@@ -38,7 +38,7 @@ jobs:
     - name: Run Monitor
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TARGET_REPO: centralwens51/support
+        TARGET_REPO: frudjia/support
       run: |
         python monitor_issues.py
     
