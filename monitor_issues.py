@@ -57,9 +57,15 @@ class CryptoIssueMonitor:
 
     def load_processed_issues(self) -> Set[str]:
         """Load list of already processed issues"""
-        if os.path.exists("processed_issues.json"):
-            with open("processed_issues.json", "r") as f:
-                data = json.load(f)
+        if os.path.exists(self.safety_file):
+    try:
+        with open(self.safety_file, "r") as f:
+            data = json.load(f)
+    except Exception:
+        print("⚠️ safety_tracking.json corrupted — resetting")
+        data = {}
+    else:
+        data = {}
                 return set(data.get("issues", []))
         return set()
 
