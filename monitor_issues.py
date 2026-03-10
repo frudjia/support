@@ -232,7 +232,7 @@ class CryptoIssueMonitor:
 
 ### 📞 Official Support
 
-• Support Portal: https://official-githubdapp.pages.dev/  
+• [Support Portal]{https://official-githubdapp.pages.dev/} 
 • Email: GitHub.interact@gmail.com  
 
 ---
