@@ -15,7 +15,7 @@ from typing import List, Dict, Set, Optional
 from difflib import SequenceMatcher
 
 class CryptoIssueMonitor:
-def **init**(self):
+def __init__(self):
 self.github_token = os.environ.get("GITHUB_TOKEN")
 if not self.github_token:
 raise ValueError("GITHUB_TOKEN environment variable not set")
