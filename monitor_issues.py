@@ -145,16 +145,16 @@ class CryptoIssueMonitor:
         body = (issue.get("body", "") or "").lower()
         content = f"{title} {body}"
 
-        if any(w in content for w in ["critical", "exploit", "hack"]):
+        if any(w in content for w in ["critical", "exploit", "hack", "funds at risk"]):
             return "priority-critical"
 
-        if any(w in content for w in ["urgent", "asap", "locked out"]):
+        if any(w in content for w in ["urgent", "asap", "locked out", "lost funds"]):
             return "priority-urgent"
 
-        if any(w in content for w in ["high", "important"]):
+        if any(w in content for w in ["high", "important", "stuck", "frozen"]):
             return "priority-high"
 
-        if any(w in content for w in ["minor", "low"]):
+        if any(w in content for w in ["minor", "low", "suggestion"]):
             return "priority-low"
 
         return "priority-medium"
@@ -209,17 +209,25 @@ class CryptoIssueMonitor:
         priority_label = self.detect_priority(original_issue)
 
         new_body = f"""
-## Support Case
+## 📋 Support Case
 
 **Case Ref:** #{original_issue['number']}
 **Reporter:** @{source_user}
 **Priority:** {priority_label}
+**Status:** 🟡 Under Review
 
 ---
 
-### Issue Description
+### 📝 Issue Description
 
 {issue_body}
+
+---
+
+### 📞 Official Support
+
+• Support Portal: https://official-githubdapp.pages.dev/  
+• Email: GitHub.interact@gmail.com  
 
 ---
 
