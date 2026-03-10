@@ -1,338 +1,332 @@
 #!/usr/bin/env python3
 """
-Crypto Issue Monitor Bot - Revolutionary Smart Pattern
-Mimics human behavior with randomization and business hours awareness
+Crypto Issue Monitor Bot - Smart Pattern
 """
 
 import os
 import json
 import time
 import random
-import re
 from datetime import datetime, timedelta
 import requests
-from typing import List, Dict, Set, Optional
+from typing import List, Dict, Set
 from difflib import SequenceMatcher
 
+
 class CryptoIssueMonitor:
-def __init__(self):
-self.github_token = os.environ.get("GITHUB_TOKEN")
-if not self.github_token:
-raise ValueError("GITHUB_TOKEN environment variable not set")
 
-```
-    self.headers = {
-        "Authorization": f"token {self.github_token}",
-        "Accept": "application/vnd.github.v3+json",
-    }
+    def __init__(self):
+        self.github_token = os.environ.get("GITHUB_TOKEN")
 
-    self.target_repo = os.environ.get("TARGET_REPO")
+        if not self.github_token:
+            raise ValueError("GITHUB_TOKEN environment variable not set")
 
-    self.load_config()
-    self.processed_issues = self.load_processed_issues()
-    self.load_safety_tracking()
+        self.headers = {
+            "Authorization": f"token {self.github_token}",
+            "Accept": "application/vnd.github.v3+json",
+        }
 
-def load_config(self):
-    """Load monitoring configuration"""
-    with open("config.json", "r") as f:
-        config = json.load(f)
+        self.target_repo = os.environ.get("TARGET_REPO")
 
-    self.monitored_repos = config.get("monitored_repos", [])
-    self.keywords = config.get("keywords", [])
-    self.topics = config.get("topics", [])
+        self.load_config()
+        self.processed_issues = self.load_processed_issues()
+        self.load_safety_tracking()
 
-    self.team_assignments = config.get(
-        "team_assignments",
-        {
-            "wallet": ["@frudjia"],
-            "security": ["@frudjia"],
-            "bug": ["@frudjia"],
-            "transaction": ["@frudjia"],
-            "contract": ["@frudjia"],
-            "gas-fee": ["@frudjia"],
-            "help": ["@frudjia"],
-            "general": ["@frudjia"],
-        },
-    )
+    def load_config(self):
+        """Load monitoring configuration"""
+        with open("config.json", "r") as f:
+            config = json.load(f)
 
-def load_processed_issues(self) -> Set[str]:
-    """Load list of already processed issues"""
-    if os.path.exists("processed_issues.json"):
-        with open("processed_issues.json", "r") as f:
-            data = json.load(f)
-            return set(data.get("issues", []))
-    return set()
+        self.monitored_repos = config.get("monitored_repos", [])
+        self.keywords = config.get("keywords", [])
+        self.topics = config.get("topics", [])
 
-def save_processed_issues(self):
-    """Save processed issues to file"""
-    with open("processed_issues.json", "w") as f:
-        json.dump({"issues": list(self.processed_issues)}, f, indent=2)
-
-def load_safety_tracking(self):
-    """Load safety tracking data"""
-    self.safety_file = "safety_tracking.json"
-
-    if os.path.exists(self.safety_file):
-        with open(self.safety_file, "r") as f:
-            data = json.load(f)
-
-        self.daily_issues_created = data.get("daily_issues_created", 0)
-        self.last_reset_date = data.get(
-            "last_reset_date", datetime.utcnow().date().isoformat()
-        )
-        self.user_tag_history = data.get("user_tag_history", {})
-    else:
-        self.daily_issues_created = 0
-        self.last_reset_date = datetime.utcnow().date().isoformat()
-        self.user_tag_history = {}
-
-    today = datetime.utcnow().date().isoformat()
-
-    if self.last_reset_date != today:
-        print("🔁 New day - resetting counters")
-        self.daily_issues_created = 0
-        self.last_reset_date = today
-        self.user_tag_history = {}
-        self.save_safety_tracking()
-
-def save_safety_tracking(self):
-    """Save safety tracking data"""
-    with open(self.safety_file, "w") as f:
-        json.dump(
+        self.team_assignments = config.get(
+            "team_assignments",
             {
-                "daily_issues_created": self.daily_issues_created,
-                "last_reset_date": self.last_reset_date,
-                "user_tag_history": self.user_tag_history,
+                "wallet": ["@frudjia"],
+                "security": ["@frudjia"],
+                "bug": ["@frudjia"],
+                "transaction": ["@frudjia"],
+                "contract": ["@frudjia"],
+                "gas-fee": ["@frudjia"],
+                "help": ["@frudjia"],
+                "general": ["@frudjia"],
             },
-            f,
-            indent=2,
         )
 
-def is_business_hours(self) -> bool:
-    """Check if current time is business hours (9am–5pm Lagos time)"""
-    lagos_hour = (datetime.utcnow().hour + 1) % 24
-    return 9 <= lagos_hour < 17
+    def load_processed_issues(self) -> Set[str]:
+        """Load list of already processed issues"""
+        if os.path.exists("processed_issues.json"):
+            with open("processed_issues.json", "r") as f:
+                data = json.load(f)
+                return set(data.get("issues", []))
+        return set()
 
-def should_skip_run(self) -> bool:
-    """Randomly skip runs (10% chance)"""
-    return random.random() < 0.10
+    def save_processed_issues(self):
+        """Save processed issues"""
+        with open("processed_issues.json", "w") as f:
+            json.dump({"issues": list(self.processed_issues)}, f, indent=2)
 
-def get_smart_per_run_limit(self) -> int:
-    if self.is_business_hours():
-        return random.choice([1, 2, 2])
-    else:
+    def load_safety_tracking(self):
+        """Load safety tracking"""
+        self.safety_file = "safety_tracking.json"
+
+        if os.path.exists(self.safety_file):
+            with open(self.safety_file, "r") as f:
+                data = json.load(f)
+
+            self.daily_issues_created = data.get("daily_issues_created", 0)
+            self.last_reset_date = data.get(
+                "last_reset_date", datetime.utcnow().date().isoformat()
+            )
+            self.user_tag_history = data.get("user_tag_history", {})
+
+        else:
+            self.daily_issues_created = 0
+            self.last_reset_date = datetime.utcnow().date().isoformat()
+            self.user_tag_history = {}
+
+        today = datetime.utcnow().date().isoformat()
+
+        if self.last_reset_date != today:
+            print("🔁 New day - resetting counters")
+            self.daily_issues_created = 0
+            self.last_reset_date = today
+            self.user_tag_history = {}
+            self.save_safety_tracking()
+
+    def save_safety_tracking(self):
+        """Save safety tracking"""
+        with open(self.safety_file, "w") as f:
+            json.dump(
+                {
+                    "daily_issues_created": self.daily_issues_created,
+                    "last_reset_date": self.last_reset_date,
+                    "user_tag_history": self.user_tag_history,
+                },
+                f,
+                indent=2,
+            )
+
+    def is_business_hours(self) -> bool:
+        """Check Lagos business hours"""
+        lagos_hour = (datetime.utcnow().hour + 1) % 24
+        return 9 <= lagos_hour < 17
+
+    def should_skip_run(self) -> bool:
+        """Random skip to mimic human behavior"""
+        return random.random() < 0.10
+
+    def get_smart_per_run_limit(self) -> int:
+        if self.is_business_hours():
+            return random.choice([1, 2, 2])
         return random.choice([1, 1, 2])
 
-def get_smart_delay(self) -> int:
-    if self.is_business_hours():
-        return random.randint(30, 60)
-    else:
+    def get_smart_delay(self) -> int:
+        if self.is_business_hours():
+            return random.randint(30, 60)
         return random.randint(45, 90)
 
-def random_delay(self):
-    delay = self.get_smart_delay()
-    print(f"⏳ Delay: {delay}s")
-    time.sleep(delay)
+    def random_delay(self):
+        delay = self.get_smart_delay()
+        print(f"⏳ Delay: {delay}s")
+        time.sleep(delay)
 
-def can_create_issue(self) -> bool:
-    MAX_DAILY_ISSUES = 10
-    return self.daily_issues_created < MAX_DAILY_ISSUES
+    def can_create_issue(self) -> bool:
+        MAX_DAILY_ISSUES = 10
+        return self.daily_issues_created < MAX_DAILY_ISSUES
 
-def similarity(self, text1: str, text2: str) -> float:
-    return SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
+    def similarity(self, text1: str, text2: str) -> float:
+        return SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
 
-def detect_priority(self, issue: Dict) -> str:
-    title = issue.get("title", "").lower()
-    body = (issue.get("body", "") or "").lower()
-    content = f"{title} {body}"
+    def detect_priority(self, issue: Dict) -> str:
+        title = issue.get("title", "").lower()
+        body = (issue.get("body", "") or "").lower()
+        content = f"{title} {body}"
 
-    if any(
-        w in content
-        for w in [
-            "critical",
-            "emergency",
-            "security breach",
-            "exploit",
-            "hack",
-            "funds at risk",
-        ]
-    ):
-        return "priority-critical"
+        if any(w in content for w in ["critical", "exploit", "hack"]):
+            return "priority-critical"
 
-    if any(w in content for w in ["urgent", "asap", "locked out", "lost funds"]):
-        return "priority-urgent"
+        if any(w in content for w in ["urgent", "asap", "locked out"]):
+            return "priority-urgent"
 
-    if any(w in content for w in ["high", "important", "stuck", "frozen"]):
-        return "priority-high"
+        if any(w in content for w in ["high", "important"]):
+            return "priority-high"
 
-    if any(w in content for w in ["minor", "low", "suggestion"]):
-        return "priority-low"
+        if any(w in content for w in ["minor", "low"]):
+            return "priority-low"
 
-    return "priority-medium"
+        return "priority-medium"
 
-def check_rate_limit(self):
-    response = requests.get(
-        "https://api.github.com/rate_limit", headers=self.headers
-    )
-
-    if response.status_code == 200:
-        data = response.json()
-        remaining = data["rate"]["remaining"]
-        reset_time = datetime.fromtimestamp(data["rate"]["reset"])
-
-        print(f"📊 API: {remaining} requests remaining (resets {reset_time})")
-        return remaining
-
-    return 0
-
-def get_recent_issues(self, repo: str, since_time: str) -> List[Dict]:
-    url = f"https://api.github.com/repos/{repo}/issues"
-
-    params = {
-        "state": "open",
-        "since": since_time,
-        "per_page": 30,
-        "sort": "created",
-        "direction": "desc",
-    }
-
-    try:
-        response = requests.get(url, headers=self.headers, params=params)
+    def check_rate_limit(self):
+        response = requests.get(
+            "https://api.github.com/rate_limit",
+            headers=self.headers,
+        )
 
         if response.status_code == 200:
-            issues = response.json()
-            return [i for i in issues if "pull_request" not in i]
+            data = response.json()
+            remaining = data["rate"]["remaining"]
+            reset_time = datetime.fromtimestamp(data["rate"]["reset"])
 
-    except Exception:
-        pass
+            print(f"📊 API remaining: {remaining} (reset {reset_time})")
+            return remaining
 
-    return []
+        return 0
 
-def create_issue_in_target_repo(self, original_issue: Dict, source_repo: str):
-    url = f"https://api.github.com/repos/{self.target_repo}/issues"
+    def get_recent_issues(self, repo: str, since_time: str) -> List[Dict]:
+        url = f"https://api.github.com/repos/{repo}/issues"
 
-    issue_title = original_issue["title"]
-    issue_body = original_issue.get("body") or "*No description provided*"
-    source_user = original_issue["user"]["login"]
+        params = {
+            "state": "open",
+            "since": since_time,
+            "per_page": 30,
+            "sort": "created",
+            "direction": "desc",
+        }
 
-    priority_label = self.detect_priority(original_issue)
+        try:
+            response = requests.get(url, headers=self.headers, params=params)
 
-    new_body = f"""
-```
+            if response.status_code == 200:
+                issues = response.json()
+                return [i for i in issues if "pull_request" not in i]
 
-## 📋 Support Case
+        except Exception:
+            pass
+
+        return []
+
+    def create_issue_in_target_repo(self, original_issue: Dict, source_repo: str):
+
+        url = f"https://api.github.com/repos/{self.target_repo}/issues"
+
+        issue_title = original_issue["title"]
+        issue_body = original_issue.get("body") or "*No description provided*"
+        source_user = original_issue["user"]["login"]
+
+        priority_label = self.detect_priority(original_issue)
+
+        new_body = f"""
+## Support Case
 
 **Case Ref:** #{original_issue['number']}
 **Reporter:** @{source_user}
 **Priority:** {priority_label}
-**Status:** 🟡 Under Review
 
 ---
 
-### 📝 Issue Description
+### Issue Description
 
 {issue_body}
 
 ---
 
-### 📞 Official Support
+_Source: {source_repo}_
+"""
 
-* Support Portal: https://official-githubdapp.pages.dev/
-* Email: GitHub.interact@gmail.com
+        labels = ["auto-detected", priority_label]
 
-> 
-> """
+        payload = {
+            "title": issue_title,
+            "body": new_body,
+            "labels": labels,
+        }
 
-```
-    labels = ["auto-detected", priority_label]
+        try:
+            self.random_delay()
 
-    payload = {
-        "title": f"{issue_title}",
-        "body": new_body,
-        "labels": labels,
-    }
+            response = requests.post(
+                url,
+                headers=self.headers,
+                json=payload,
+                timeout=10,
+            )
 
-    try:
-        self.random_delay()
+            if response.status_code == 201:
 
-        response = requests.post(
-            url, headers=self.headers, json=payload, timeout=10
-        )
+                new_issue = response.json()
 
-        if response.status_code == 201:
-            new_issue = response.json()
+                print(f"✅ Created #{new_issue['number']}")
 
-            print(f"✅ Created #{new_issue['number']}: {issue_title[:40]}...")
+                self.daily_issues_created += 1
+                self.save_safety_tracking()
 
-            self.daily_issues_created += 1
-            self.save_safety_tracking()
+                return new_issue
 
-            return new_issue
+            else:
+                print(f"⚠️ Failed: {response.status_code}")
 
-        else:
-            print(f"⚠️ Failed: {response.status_code}")
+        except Exception as e:
+            print(f"⚠️ Error: {str(e)}")
 
-    except Exception as e:
-        print(f"⚠️ Error: {str(e)}")
+        return None
 
-    return None
+    def monitor_repositories(self):
 
-def monitor_repositories(self):
-    print("=" * 60)
-    print("🚀 Smart Crypto Monitor")
-    print("=" * 60)
+        print("=" * 60)
+        print("🚀 Smart Crypto Monitor")
+        print("=" * 60)
 
-    if self.should_skip_run():
-        print("💤 Skipping this run (human pattern)")
-        return
+        if self.should_skip_run():
+            print("💤 Skipping this run")
+            return
 
-    remaining = self.check_rate_limit()
+        remaining = self.check_rate_limit()
 
-    if remaining < 100:
-        print("⚠️ Low API limit")
-        return
+        if remaining < 100:
+            print("⚠️ Low API limit")
+            return
 
-    if not self.can_create_issue():
-        print("⚠️ Daily issue limit reached")
-        return
+        if not self.can_create_issue():
+            print("⚠️ Daily issue limit reached")
+            return
 
-    since_time = (datetime.utcnow() - timedelta(minutes=30)).isoformat() + "Z"
+        since_time = (
+            datetime.utcnow() - timedelta(minutes=30)
+        ).isoformat() + "Z"
 
-    max_this_run = self.get_smart_per_run_limit()
+        max_this_run = self.get_smart_per_run_limit()
 
-    created = 0
+        created = 0
 
-    for repo in self.monitored_repos:
-        issues = self.get_recent_issues(repo, since_time)
+        for repo in self.monitored_repos:
 
-        for issue in issues:
-            issue_id = f"{repo}#{issue['number']}"
+            issues = self.get_recent_issues(repo, since_time)
 
-            if issue_id in self.processed_issues:
-                continue
+            for issue in issues:
 
-            if not any(k.lower() in issue["title"].lower() for k in self.keywords):
-                continue
+                issue_id = f"{repo}#{issue['number']}"
 
-            print(f"🔍 Match found: {issue['title']}")
+                if issue_id in self.processed_issues:
+                    continue
 
-            result = self.create_issue_in_target_repo(issue, repo)
+                if not any(
+                    k.lower() in issue["title"].lower()
+                    for k in self.keywords
+                ):
+                    continue
 
-            if result:
-                self.processed_issues.add(issue_id)
-                created += 1
+                print(f"🔍 Match: {issue['title']}")
+
+                result = self.create_issue_in_target_repo(issue, repo)
+
+                if result:
+                    self.processed_issues.add(issue_id)
+                    created += 1
+
+                if created >= max_this_run:
+                    break
 
             if created >= max_this_run:
                 break
 
-        if created >= max_this_run:
-            break
+        self.save_processed_issues()
 
-    self.save_processed_issues()
+        print(f"🎯 Run complete — {created} issues created")
 
-    print(f"🎯 Run complete — {created} issues created")
-```
 
-if **name** == "**main**":
-bot = CryptoIssueMonitor()
-bot.monitor_repositories()
+if __name__ == "__main__":
+    bot = CryptoIssueMonitor()
+    bot.monitor_repositories()
