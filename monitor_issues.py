@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Crypto Issue Monitor Bot - Smart Pattern
+Crypto Issue Monitor Bot - Smart Pattern (Fixed Version)
 """
 
 import os
 import json
 import time
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import requests
 from typing import List, Dict, Set
 from difflib import SequenceMatcher
@@ -17,23 +17,29 @@ class CryptoIssueMonitor:
 
     def __init__(self):
         self.github_token = os.environ.get("GITHUB_TOKEN")
+        self.target_repo = os.environ.get("TARGET_REPO")
 
         if not self.github_token:
             raise ValueError("GITHUB_TOKEN environment variable not set")
+
+        if not self.target_repo:
+            raise ValueError("TARGET_REPO environment variable not set")
 
         self.headers = {
             "Authorization": f"token {self.github_token}",
             "Accept": "application/vnd.github.v3+json",
         }
 
-        self.target_repo = os.environ.get("TARGET_REPO")
+        self.processed_file = "processed_issues.json"
+        self.safety_file = "safety_tracking.json"
 
         self.load_config()
         self.processed_issues = self.load_processed_issues()
         self.load_safety_tracking()
 
+    # ---------------- CONFIG ---------------- #
+
     def load_config(self):
-        """Load monitoring configuration"""
         with open("config.json", "r") as f:
             config = json.load(f)
 
@@ -41,57 +47,49 @@ class CryptoIssueMonitor:
         self.keywords = config.get("keywords", [])
         self.topics = config.get("topics", [])
 
-        self.team_assignments = config.get(
-            "team_assignments",
-            {
-                "wallet": ["@frudjia"],
-                "security": ["@frudjia"],
-                "bug": ["@frudjia"],
-                "transaction": ["@frudjia"],
-                "contract": ["@frudjia"],
-                "gas-fee": ["@frudjia"],
-                "help": ["@frudjia"],
-                "general": ["@frudjia"],
-            },
-        )
+    # ---------------- PROCESSED ISSUES ---------------- #
 
     def load_processed_issues(self) -> Set[str]:
-        """Load list of already processed issues"""
-       if os.path.exists(self.safety_file):
-    try:
-        with open(self.safety_file, "r") as f:
-            data = json.load(f)
-    except Exception:
-        print("⚠️ safety_tracking.json corrupted — resetting")
-        data = {}
-    else:
-        data = {}
+
+        if os.path.exists(self.processed_file):
+            try:
+                with open(self.processed_file, "r") as f:
+                    data = json.load(f)
                 return set(data.get("issues", []))
+            except Exception:
+                print("⚠️ processed_issues.json corrupted — resetting")
+
         return set()
 
     def save_processed_issues(self):
-        """Save processed issues"""
-        with open("processed_issues.json", "w") as f:
-            json.dump({"issues": list(self.processed_issues)}, f, indent=2)
+
+        with open(self.processed_file, "w") as f:
+            json.dump(
+                {"issues": list(self.processed_issues)},
+                f,
+                indent=2
+            )
+
+    # ---------------- SAFETY TRACKING ---------------- #
 
     def load_safety_tracking(self):
-        """Load safety tracking"""
-        self.safety_file = "safety_tracking.json"
 
         if os.path.exists(self.safety_file):
-            with open(self.safety_file, "r") as f:
-                data = json.load(f)
-
-            self.daily_issues_created = data.get("daily_issues_created", 0)
-            self.last_reset_date = data.get(
-                "last_reset_date", datetime.utcnow().date().isoformat()
-            )
-            self.user_tag_history = data.get("user_tag_history", {})
-
+            try:
+                with open(self.safety_file, "r") as f:
+                    data = json.load(f)
+            except Exception:
+                print("⚠️ safety_tracking.json corrupted — resetting")
+                data = {}
         else:
-            self.daily_issues_created = 0
-            self.last_reset_date = datetime.utcnow().date().isoformat()
-            self.user_tag_history = {}
+            data = {}
+
+        self.daily_issues_created = data.get("daily_issues_created", 0)
+        self.last_reset_date = data.get(
+            "last_reset_date",
+            datetime.utcnow().date().isoformat()
+        )
+        self.user_tag_history = data.get("user_tag_history", {})
 
         today = datetime.utcnow().date().isoformat()
 
@@ -103,7 +101,7 @@ class CryptoIssueMonitor:
             self.save_safety_tracking()
 
     def save_safety_tracking(self):
-        """Save safety tracking"""
+
         with open(self.safety_file, "w") as f:
             json.dump(
                 {
@@ -115,13 +113,14 @@ class CryptoIssueMonitor:
                 indent=2,
             )
 
+    # ---------------- BEHAVIOR ---------------- #
+
     def is_business_hours(self) -> bool:
-        """Check Lagos business hours"""
-        lagos_hour = (datetime.utcnow().hour + 1) % 24
+        lagos = timezone(timedelta(hours=1))
+        lagos_hour = datetime.now(lagos).hour
         return 9 <= lagos_hour < 17
 
     def should_skip_run(self) -> bool:
-        """Random skip to mimic human behavior"""
         return random.random() < 0.10
 
     def get_smart_per_run_limit(self) -> int:
@@ -143,10 +142,13 @@ class CryptoIssueMonitor:
         MAX_DAILY_ISSUES = 10
         return self.daily_issues_created < MAX_DAILY_ISSUES
 
+    # ---------------- ANALYSIS ---------------- #
+
     def similarity(self, text1: str, text2: str) -> float:
         return SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
 
     def detect_priority(self, issue: Dict) -> str:
+
         title = issue.get("title", "").lower()
         body = (issue.get("body", "") or "").lower()
         content = f"{title} {body}"
@@ -165,23 +167,32 @@ class CryptoIssueMonitor:
 
         return "priority-medium"
 
+    # ---------------- API ---------------- #
+
     def check_rate_limit(self):
-        response = requests.get(
-            "https://api.github.com/rate_limit",
-            headers=self.headers,
-        )
 
-        if response.status_code == 200:
-            data = response.json()
-            remaining = data["rate"]["remaining"]
-            reset_time = datetime.fromtimestamp(data["rate"]["reset"])
+        try:
+            response = requests.get(
+                "https://api.github.com/rate_limit",
+                headers=self.headers,
+                timeout=10
+            )
 
-            print(f"📊 API remaining: {remaining} (reset {reset_time})")
-            return remaining
+            if response.status_code == 200:
+                data = response.json()
+                remaining = data["rate"]["remaining"]
+                reset_time = datetime.fromtimestamp(data["rate"]["reset"])
+
+                print(f"📊 API remaining: {remaining} (reset {reset_time})")
+                return remaining
+
+        except Exception as e:
+            print(f"Rate limit check failed: {e}")
 
         return 0
 
     def get_recent_issues(self, repo: str, since_time: str) -> List[Dict]:
+
         url = f"https://api.github.com/repos/{repo}/issues"
 
         params = {
@@ -193,16 +204,24 @@ class CryptoIssueMonitor:
         }
 
         try:
-            response = requests.get(url, headers=self.headers, params=params)
+
+            response = requests.get(
+                url,
+                headers=self.headers,
+                params=params,
+                timeout=10
+            )
 
             if response.status_code == 200:
                 issues = response.json()
                 return [i for i in issues if "pull_request" not in i]
 
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Error fetching issues from {repo}: {e}")
 
         return []
+
+    # ---------------- CREATE ISSUE ---------------- #
 
     def create_issue_in_target_repo(self, original_issue: Dict, source_repo: str):
 
@@ -232,7 +251,7 @@ class CryptoIssueMonitor:
 
 ### 📞 Official Support
 
-• [Support Portal]{https://official-githubdapp.pages.dev/} 
+• [Support Portal](https://official-githubdapp.pages.dev/)  
 • Email: GitHub.interact@gmail.com  
 
 ---
@@ -240,15 +259,14 @@ class CryptoIssueMonitor:
 _Source: {source_repo}_
 """
 
-        labels = ["auto-detected", priority_label]
-
         payload = {
             "title": issue_title,
             "body": new_body,
-            "labels": labels,
+            "labels": ["auto-detected", priority_label],
         }
 
         try:
+
             self.random_delay()
 
             response = requests.post(
@@ -273,9 +291,11 @@ _Source: {source_repo}_
                 print(f"⚠️ Failed: {response.status_code}")
 
         except Exception as e:
-            print(f"⚠️ Error: {str(e)}")
+            print(f"⚠️ Error creating issue: {e}")
 
         return None
+
+    # ---------------- MAIN MONITOR ---------------- #
 
     def monitor_repositories(self):
 
@@ -316,10 +336,13 @@ _Source: {source_repo}_
                 if issue_id in self.processed_issues:
                     continue
 
-                if not any(
-                    k.lower() in issue["title"].lower()
-                    for k in self.keywords
-                ):
+                content = (
+                    issue["title"] +
+                    " " +
+                    (issue.get("body") or "")
+                ).lower()
+
+                if not any(k.lower() in content for k in self.keywords):
                     continue
 
                 print(f"🔍 Match: {issue['title']}")
