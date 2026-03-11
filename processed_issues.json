@@ -1,13 +1,14 @@
 {
   "issues": [
-    "centralwens51/support#29",
-    "SatoshiPortal/bullbitcoin-mobile#1887",
     "MetaMask/metamask-mobile#27310",
-    "B25S/Support#313",
+    "MetaMask/metamask-extension#40770",
+    "SatoshiPortal/bullbitcoin-mobile#1887",
     "centralwens51/support#31",
+    "centralwens51/support#29",
+    "B25S/Support#315",
     "MetaMask/metamask-mobile#27308",
-    "ShreddedBabyguts/Support-Repo#141",
     "centralwens51/support#22",
-    "MetaMask/metamask-extension#40770"
+    "B25S/Support#313",
+    "ShreddedBabyguts/Support-Repo#141"
   ]
 }
