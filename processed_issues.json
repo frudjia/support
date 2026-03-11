@@ -1,10 +1,10 @@
 {
   "issues": [
+    "MetaMask/metamask-mobile#27308",
+    "centralwens51/support#29",
     "centralwens51/support#22",
     "ShreddedBabyguts/Support-Repo#141",
-    "MetaMask/metamask-mobile#27308",
     "MetaMask/metamask-mobile#27310",
-    "MetaMask/metamask-extension#40770",
-    "centralwens51/support#29"
+    "MetaMask/metamask-extension#40770"
   ]
 }
