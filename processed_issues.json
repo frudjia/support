@@ -1,16 +1,17 @@
 {
   "issues": [
-    "centralwens51/support#22",
-    "B25S/Support#315",
-    "ShreddedBabyguts/Support-Repo#141",
-    "MetaMask/metamask-extension#40770",
-    "B25S/Support#313",
+    "MetaMask/metamask-mobile#27308",
     "centralwens51/support#29",
     "ShreddedBabyguts/Support-Repo#144",
-    "SatoshiPortal/bullbitcoin-mobile#1887",
+    "sparrowwallet/sparrow#1966",
+    "B25S/Support#315",
+    "centralwens51/support#22",
     "ShreddedBabyguts/Support-Repo#143",
-    "MetaMask/metamask-mobile#27308",
+    "MetaMask/metamask-mobile#27310",
+    "B25S/Support#313",
     "centralwens51/support#31",
-    "MetaMask/metamask-mobile#27310"
+    "SatoshiPortal/bullbitcoin-mobile#1887",
+    "ShreddedBabyguts/Support-Repo#141",
+    "MetaMask/metamask-extension#40770"
   ]
 }
