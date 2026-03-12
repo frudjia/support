@@ -1,22 +1,24 @@
 {
   "issues": [
-    "MetaMask/metamask-mobile#27308",
+    "B25S/Support#322",
     "ShreddedBabyguts/Support-Repo#144",
-    "centralwens51/support#22",
-    "B25S/Support#324",
+    "B25S/Support#323",
+    "centralwens51/support#29",
+    "SatoshiPortal/bullbitcoin-mobile#1887",
     "ShreddedBabyguts/Support-Repo#146",
+    "MetaMask/metamask-extension#40770",
+    "B25S/Support#315",
     "sparrowwallet/sparrow#1966",
     "MetaMask/metamask-mobile#27310",
-    "ShreddedBabyguts/Support-Repo#141",
-    "B25S/Support#323",
-    "B25S/Support#317",
-    "MetaMask/metamask-extension#40770",
-    "B25S/Support#322",
+    "B25S/Support#330",
+    "centralwens51/support#22",
     "B25S/Support#313",
-    "centralwens51/support#29",
+    "ShreddedBabyguts/Support-Repo#141",
     "centralwens51/support#31",
-    "SatoshiPortal/bullbitcoin-mobile#1887",
-    "B25S/Support#315",
-    "ShreddedBabyguts/Support-Repo#143"
+    "B25S/Support#317",
+    "B25S/Support#331",
+    "MetaMask/metamask-mobile#27308",
+    "ShreddedBabyguts/Support-Repo#143",
+    "B25S/Support#324"
   ]
 }
